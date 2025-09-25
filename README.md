@@ -26,6 +26,14 @@ uv run python -m src.ep1.experiments
 
 O script faz validação estratificada com k-folds (valor padrão `N_FOLDS = 5`). Para alterar quantidade de folds ou os hiperparâmetros considerados, edite `src/ep1/experiments.py` antes de rodar o comando.
 
+Relatório automático
+--------------------
+Para gerar um resumo em Markdown com os resultados atuais do CSV:
+```bash
+uv run python -m src.ep1.report --input experiments.csv --output reports/experiments_report.md
+```
+O parâmetro `--top` (opcional) permite limitar quantas linhas aparecerão por conjunto (`--top 5`, por exemplo). O arquivo final fica por padrão em `reports/experiments_report.md`.
+
 Modelos implementados
 ---------------------
 - `tfidf_lr`: Regressão logística sobre vetores TF-IDF.
