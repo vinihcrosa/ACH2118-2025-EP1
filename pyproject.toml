@@ -1,0 +1,14 @@
+[project]
+name = "ach2118-2025-ep1"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "joblib>=1.5.2",
+    "pandas>=2.3.2",
+    "scikit-learn>=1.7.2",
+    "sentence-transformers>=5.1.1",
+    "skorch>=1.2.0",
+    "torch>=2.8.0",
+]
