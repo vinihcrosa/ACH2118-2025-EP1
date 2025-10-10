@@ -59,6 +59,7 @@ jobs:
         
     - name: Run training
       run: |
+        export PYTHONPATH="${PYTHONPATH}:${PWD}"
         IFS=',' read -ra DATASETS <<< "${{ steps.parse.outputs.datasets }}"
         IFS=',' read -ra MODELS <<< "${{ steps.parse.outputs.models }}"
         
@@ -83,6 +84,7 @@ jobs:
     - name: Generate report
       if: always()
       run: |
+        export PYTHONPATH="${PYTHONPATH}:${PWD}"
         uv run python src/ep1/report.py
         
     - name: Upload results

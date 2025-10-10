@@ -44,11 +44,13 @@ jobs:
           
     - name: Run all experiments
       run: |
+        export PYTHONPATH="${PYTHONPATH}:${PWD}"
         uv run python src/ep1/experiments.py
       timeout-minutes: 120  # 2 horas de timeout
       
     - name: Generate report
       run: |
+        export PYTHONPATH="${PYTHONPATH}:${PWD}"
         uv run python src/ep1/report.py
         
     - name: Upload results

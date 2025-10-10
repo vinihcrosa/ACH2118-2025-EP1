@@ -35,6 +35,7 @@ jobs:
         
     - name: Test imports
       run: |
+        export PYTHONPATH="${PYTHONPATH}:${PWD}"
         echo "Testing module imports..."
         uv run python -c "from src.ep1.config import get_default_config; print('✓ Config OK')"
         uv run python -c "from src.ep1.train import main; print('✓ Train OK')"
@@ -55,6 +56,7 @@ jobs:
         
     - name: Test model creation
       run: |
+        export PYTHONPATH="${PYTHONPATH}:${PWD}"
         echo "Testing model creation..."
         uv run python -c "
         from src.ep1.config import get_default_config
@@ -68,6 +70,7 @@ jobs:
         
     - name: Quick training test
       run: |
+        export PYTHONPATH="${PYTHONPATH}:${PWD}"
         echo "Running quick training test..."
         uv run python -c "
         from src.ep1.config import get_default_config
