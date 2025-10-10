@@ -1,0 +1,122 @@
+name: Train Specific Models
+
+on:
+  workflow_dispatch:
+    inputs:
+      datasets:
+        description: 'Datasets to use (comma-separated)'
+        required: false
+        default: 'arcaico_moderno,complexo_simples,literal_dinamico'
+        type: string
+      models:
+        description: 'Models to train (comma-separated)'
+        required: false
+        default: 'all'
+        type: string
+      save_models:
+        description: 'Save trained models'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  train-models:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        
+    - name: Install uv
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        
+    - name: Install dependencies
+      run: |
+        uv sync
+        
+    - name: Cache embeddings
+      uses: actions/cache@v4
+      with:
+        path: |
+          cache/embeddings
+          ~/.cache/torch
+        key: ${{ runner.os }}-embeddings-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-embeddings-
+          
+    - name: Parse inputs
+      id: parse
+      run: |
+        echo "datasets=${{ github.event.inputs.datasets }}" >> $GITHUB_OUTPUT
+        echo "models=${{ github.event.inputs.models }}" >> $GITHUB_OUTPUT
+        
+    - name: Run training
+      run: |
+        IFS=',' read -ra DATASETS <<< "${{ steps.parse.outputs.datasets }}"
+        IFS=',' read -ra MODELS <<< "${{ steps.parse.outputs.models }}"
+        
+        if [ "${{ steps.parse.outputs.models }}" = "all" ]; then
+          echo "Running experiments for all models..."
+          uv run python src/ep1/experiments.py
+        else
+          echo "Training specific models..."
+          for dataset in "${DATASETS[@]}"; do
+            for model in "${MODELS[@]}"; do
+              echo "Training $model on $dataset..."
+              if [ "${{ github.event.inputs.save_models }}" = "true" ]; then
+                uv run python src/ep1/train.py --dataset "$dataset" --model "$model" --save
+              else
+                uv run python src/ep1/train.py --dataset "$dataset" --model "$model"
+              fi
+            done
+          done
+        fi
+      timeout-minutes: 180
+      
+    - name: Generate report
+      if: always()
+      run: |
+        uv run python src/ep1/report.py
+        
+    - name: Upload results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: training-results-${{ github.run_number }}
+        path: |
+          results.csv
+          experiments.csv
+          reports/experiments_report.md
+        retention-days: 90
+        
+    - name: Upload trained models
+      uses: actions/upload-artifact@v4
+      if: github.event.inputs.save_models == 'true'
+      with:
+        name: trained-models-${{ github.run_number }}
+        path: |
+          models/*.joblib
+        retention-days: 30
+        
+    - name: Create summary
+      if: always()
+      run: |
+        echo "# 🎯 Training Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Configuration" >> $GITHUB_STEP_SUMMARY
+        echo "- **Datasets**: ${{ github.event.inputs.datasets }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Models**: ${{ github.event.inputs.models }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Save Models**: ${{ github.event.inputs.save_models }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ -f "reports/experiments_report.md" ]; then
+          echo "## Results" >> $GITHUB_STEP_SUMMARY
+          cat reports/experiments_report.md >> $GITHUB_STEP_SUMMARY
+        fi

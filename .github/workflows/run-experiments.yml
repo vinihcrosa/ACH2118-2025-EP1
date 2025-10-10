@@ -1,0 +1,94 @@
+name: Run ML Experiments
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Permite executar manualmente
+  schedule:
+    # Roda todo domingo às 00:00 UTC
+    - cron: '0 0 * * 0'
+
+jobs:
+  run-experiments:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        
+    - name: Install uv
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        
+    - name: Install dependencies
+      run: |
+        uv sync
+        
+    - name: Cache embeddings
+      uses: actions/cache@v4
+      with:
+        path: |
+          cache/embeddings
+          ~/.cache/torch
+        key: ${{ runner.os }}-embeddings-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-embeddings-
+          
+    - name: Run all experiments
+      run: |
+        uv run python src/ep1/experiments.py
+      timeout-minutes: 120  # 2 horas de timeout
+      
+    - name: Generate report
+      run: |
+        uv run python src/ep1/report.py
+        
+    - name: Upload results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: experiment-results
+        path: |
+          results.csv
+          experiments.csv
+          reports/experiments_report.md
+        retention-days: 90
+        
+    - name: Upload trained models
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: trained-models
+        path: |
+          models/*.joblib
+        retention-days: 30
+        
+    - name: Comment PR with results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          let comment = '## 🤖 Resultados dos Experimentos\n\n';
+          
+          try {
+            const report = fs.readFileSync('reports/experiments_report.md', 'utf8');
+            comment += report;
+          } catch (error) {
+            comment += '❌ Erro ao ler o relatório de experimentos.';
+          }
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
