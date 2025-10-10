@@ -79,20 +79,11 @@ def create_tfidf_complement_nb():
 
 
 def get_model(name: str):
-    name = name.lower()
-    registry = {
-        "tfidf_lr": create_tfidf_lr,
-        "tfidf_sgd": create_tfidf_sgd,
-        "tfidf_pa": create_tfidf_passive_aggressive,
-        "tfidf_ridge": create_tfidf_ridge,
-        "tfidf_cnb": create_tfidf_complement_nb,
-        "sbert_lr": create_sbert_lr,
-        "sbert_svc": create_sbert_svc,
-        "torch_mlp": create_torch_mlp,
-    }
-    if name not in registry:
-        raise ValueError(
-            "Modelo '%s' não encontrado. Opções: %s"
-            % (name, ", ".join(sorted(registry)))
-        )
-    return registry[name]()
+    """
+    DEPRECATED: Use src.ep1.config.PipelineConfig.get_model() ao invés disso.
+    
+    Esta função é mantida para compatibilidade retroativa.
+    """
+    from src.ep1.config import get_default_config
+    config = get_default_config()
+    return config.get_model(name)

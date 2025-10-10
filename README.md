@@ -3,6 +3,79 @@ ACH2118-2025-EP1
 
 Este projeto reúne experimentos de classificação de estilo de texto usados na disciplina ACH2118. Os scripts trabalham com três conjuntos de dados (`train_arcaico_moderno.csv`, `train_complexo_simples.csv`, `train_literal_dinamico.csv`) e avaliam diversos classificadores tradicionais e neurais baseados em TF-IDF, SBERT e MLP.
 
+## 🚀 Início Rápido
+
+### Instalação
+```bash
+# Instalar dependências
+uv sync
+
+# Listar modelos disponíveis
+uv run predict_cli.py --list-models
+
+# Classificar um texto
+uv run predict_cli.py --model arcaico_moderno__tfidf_lr --text "Seu texto aqui" --proba
+```
+
+## 📚 Documentação
+
+- **[HOW_TO_PREDICT.md](HOW_TO_PREDICT.md)** - 🎯 **COMECE AQUI!** Guia completo de como usar modelos treinados
+- **[QUICKSTART.md](QUICKSTART.md)** - Guia rápido do sistema de configuração JSON
+- **[config/README.md](config/README.md)** - Documentação detalhada das configurações
+- **[MIGRATION.md](MIGRATION.md)** - Detalhes da migração para JSON
+- **[PREDICT_GUIDE.md](PREDICT_GUIDE.md)** - Guia detalhado de predição
+
+## 💻 Principais Funcionalidades
+
+### 1. Usar Modelos Treinados (Predição)
+
+**CLI Simples:**
+```bash
+# Classificar texto
+uv run predict_cli.py --model arcaico_moderno__tfidf_lr --text "Seu texto"
+
+# Processar CSV
+uv run predict_cli.py --model complexo_simples__tfidf_lr --csv dados.csv
+
+# Comparar todos os modelos
+uv run predict_cli.py --compare "Texto para comparar"
+```
+
+**Python:**
+```python
+from src.ep1.inference import ModelPredictor
+
+predictor = ModelPredictor("models/arcaico_moderno__tfidf_lr.joblib")
+predicao = predictor.predict("Seu texto aqui")
+```
+
+Ver exemplos completos: `uv run examples_inference.py`
+
+### 2. Treinar Novos Modelos
+
+```bash
+uv run src/ep1/train.py \
+  --dataset arcaico_moderno \
+  --model tfidf_lr \
+  --cv 10 \
+  --save
+```
+
+### 3. Executar Experimentos
+
+```bash
+# Roda todos os experimentos configurados em config/pipelines.json
+uv run python -m src.ep1.experiments
+```
+
+### 4. Gerar Relatórios
+
+```bash
+uv run python -m src.ep1.report \
+  --input experiments.csv \
+  --output reports/experiments_report.md
+```
+
 Requisitos
 ----------
 - Python 3.11+
@@ -17,14 +90,40 @@ Configuração
    uv sync
    ```
 
+## ⚙️ Configuração via JSON
+
+Todos os modelos e experimentos agora são configurados através de `config/pipelines.json`. Isso permite:
+
+- ✅ Adicionar novos modelos sem editar código Python
+- ✅ Modificar parâmetros facilmente
+- ✅ Configurações versionadas e reproduzíveis
+- ✅ Suporte para modelos sklearn e customizados
+
+**Exemplo de configuração:**
+```json
+{
+  "models": {
+    "tfidf_lr": {
+      "type": "sklearn_pipeline",
+      "steps": [
+        {"name": "tfidf", "class": "sklearn.feature_extraction.text.TfidfVectorizer", "params": {}},
+        {"name": "clf", "class": "sklearn.linear_model.LogisticRegression", "params": {"max_iter": 2000}}
+      ]
+    }
+  }
+}
+```
+
+Ver mais: `config/README.md` ou `uv run examples_config.py`
+
 Como rodar os experimentos
 --------------------------
-Executa toda a grade de validação cruzada para os modelos definidos em `src/ep1/experiments.py` e grava os resultados em `experiments.csv`.
+Executa toda a grade de validação cruzada para os modelos definidos em `config/pipelines.json` e grava os resultados em `experiments.csv`.
 ```bash
 uv run python -m src.ep1.experiments
 ```
 
-O script faz validação estratificada com k-folds (valor padrão `N_FOLDS = 5`). Para alterar quantidade de folds ou os hiperparâmetros considerados, edite `src/ep1/experiments.py` antes de rodar o comando.
+O script faz validação estratificada com k-folds (configurável em `config/pipelines.json`). Para alterar modelos ou hiperparâmetros, edite `config/pipelines.json`.
 
 Relatório automático
 --------------------

@@ -1,0 +1,398 @@
+{
+  "datasets": {
+    "arcaico_moderno": "train_arcaico_moderno.csv",
+    "complexo_simples": "train_complexo_simples.csv",
+    "literal_dinamico": "train_literal_dinamico.csv"
+  },
+  "cv_config": {
+    "n_folds": 5,
+    "random_state": 42
+  },
+  "models": {
+    "tfidf_lr": {
+      "type": "sklearn_pipeline",
+      "steps": [
+        {
+          "name": "tfidf",
+          "class": "sklearn.feature_extraction.text.TfidfVectorizer",
+          "params": {}
+        },
+        {
+          "name": "clf",
+          "class": "sklearn.linear_model.LogisticRegression",
+          "params": {
+            "max_iter": 2000,
+            "n_jobs": 1
+          }
+        }
+      ]
+    },
+    "tfidf_sgd": {
+      "type": "sklearn_pipeline",
+      "steps": [
+        {
+          "name": "tfidf",
+          "class": "sklearn.feature_extraction.text.TfidfVectorizer",
+          "params": {}
+        },
+        {
+          "name": "clf",
+          "class": "sklearn.linear_model.SGDClassifier",
+          "params": {
+            "loss": "log_loss",
+            "penalty": "l2",
+            "alpha": 0.0001,
+            "max_iter": 2000,
+            "random_state": 42
+          }
+        }
+      ]
+    },
+    "tfidf_pa": {
+      "type": "sklearn_pipeline",
+      "steps": [
+        {
+          "name": "tfidf",
+          "class": "sklearn.feature_extraction.text.TfidfVectorizer",
+          "params": {}
+        },
+        {
+          "name": "clf",
+          "class": "sklearn.linear_model.PassiveAggressiveClassifier",
+          "params": {
+            "loss": "hinge",
+            "max_iter": 1000,
+            "random_state": 42
+          }
+        }
+      ]
+    },
+    "tfidf_ridge": {
+      "type": "sklearn_pipeline",
+      "steps": [
+        {
+          "name": "tfidf",
+          "class": "sklearn.feature_extraction.text.TfidfVectorizer",
+          "params": {}
+        },
+        {
+          "name": "clf",
+          "class": "sklearn.linear_model.RidgeClassifier",
+          "params": {
+            "class_weight": null
+          }
+        }
+      ]
+    },
+    "tfidf_cnb": {
+      "type": "sklearn_pipeline",
+      "steps": [
+        {
+          "name": "tfidf",
+          "class": "sklearn.feature_extraction.text.TfidfVectorizer",
+          "params": {}
+        },
+        {
+          "name": "clf",
+          "class": "sklearn.naive_bayes.ComplementNB",
+          "params": {
+            "alpha": 1.0
+          }
+        }
+      ]
+    },
+    "tfidf_nb": {
+      "type": "sklearn_pipeline",
+      "steps": [
+        {
+          "name": "tfidf",
+          "class": "sklearn.feature_extraction.text.TfidfVectorizer",
+          "params": {}
+        },
+        {
+          "name": "clf",
+          "class": "sklearn.naive_bayes.MultinomialNB",
+          "params": {}
+        }
+      ]
+    },
+    "tfidf_svc": {
+      "type": "sklearn_pipeline",
+      "steps": [
+        {
+          "name": "tfidf",
+          "class": "sklearn.feature_extraction.text.TfidfVectorizer",
+          "params": {}
+        },
+        {
+          "name": "clf",
+          "class": "sklearn.svm.LinearSVC",
+          "params": {}
+        }
+      ]
+    },
+    "sbert_lr": {
+      "type": "custom",
+      "factory": "src.ep1.models.sbert.create_sbert_lr",
+      "params": {}
+    },
+    "sbert_svc": {
+      "type": "custom",
+      "factory": "src.ep1.models.sbert.create_sbert_svc",
+      "params": {}
+    },
+    "torch_mlp": {
+      "type": "custom",
+      "factory": "src.ep1.models.mlp.create_torch_mlp",
+      "params": {}
+    }
+  },
+  "experiments": [
+    {
+      "model": "tfidf_lr",
+      "param_grid": {
+        "tfidf__max_features": [
+          3000,
+          5000
+        ],
+        "tfidf__ngram_range": [
+          [
+            1,
+            1
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            10
+          ]
+        ]
+      }
+    },
+    {
+      "model": "tfidf_sgd",
+      "param_grid": {
+        "tfidf__max_features": [
+          3000,
+          5000
+        ],
+        "tfidf__ngram_range": [
+          [
+            1,
+            1
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            10
+          ]
+        ],
+        "clf__alpha": [
+          0.0001,
+          0.00001
+        ]
+      }
+    },
+    {
+      "model": "tfidf_pa",
+      "param_grid": {
+        "tfidf__max_features": [
+          3000,
+          5000
+        ],
+        "tfidf__ngram_range": [
+          [
+            1,
+            1
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            10
+          ]
+        ],
+        "clf__C": [
+          0.5,
+          1.0
+        ],
+        "clf__loss": [
+          "hinge",
+          "squared_hinge"
+        ]
+      }
+    },
+    {
+      "model": "tfidf_ridge",
+      "param_grid": {
+        "tfidf__max_features": [
+          3000,
+          5000
+        ],
+        "tfidf__ngram_range": [
+          [
+            1,
+            1
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            10
+          ]
+        ],
+        "clf__alpha": [
+          0.5,
+          1.0
+        ]
+      }
+    },
+    {
+      "model": "tfidf_cnb",
+      "param_grid": {
+        "tfidf__max_features": [
+          3000,
+          5000
+        ],
+        "tfidf__ngram_range": [
+          [
+            1,
+            1
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            10
+          ]
+        ],
+        "clf__alpha": [
+          0.5,
+          1.0,
+          1.5
+        ]
+      }
+    },
+    {
+      "model": "tfidf_nb",
+      "param_grid": {
+        "tfidf__max_features": [
+          3000,
+          5000
+        ],
+        "tfidf__ngram_range": [
+          [
+            1,
+            1
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            10
+          ]
+        ]
+      }
+    },
+    {
+      "model": "tfidf_svc",
+      "param_grid": {
+        "tfidf__max_features": [
+          3000,
+          5000
+        ],
+        "tfidf__ngram_range": [
+          [
+            1,
+            1
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            10
+          ]
+        ]
+      }
+    },
+    {
+      "model": "sbert_lr",
+      "param_grid": {
+        "sbert__sbert_model": [
+          "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+          "sentence-transformers/distiluse-base-multilingual-cased-v2"
+        ]
+      }
+    },
+    {
+      "model": "sbert_svc",
+      "param_grid": {
+        "sbert__sbert_model": [
+          "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+          "sentence-transformers/distiluse-base-multilingual-cased-v2"
+        ],
+        "clf__C": [
+          0.5,
+          1.0,
+          2.0
+        ]
+      }
+    },
+    {
+      "model": "torch_mlp",
+      "param_grid": {
+        "mlp__hidden": [
+          128,
+          256
+        ],
+        "mlp__epochs": [
+          5,
+          10
+        ]
+      }
+    }
+  ]
+}

@@ -6,18 +6,16 @@ import pandas as pd
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 
 from src.ep1.data import load_dataset
-from src.ep1.models import get_model
+from src.ep1.config import get_default_config
 
-DATASETS = {
-    "arcaico_moderno": "train_arcaico_moderno.csv",
-    "complexo_simples": "train_complexo_simples.csv",
-    "literal_dinamico": "train_literal_dinamico.csv",
-}
+# Carregar configuração
+config = get_default_config()
+DATASETS = config.datasets
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", choices=DATASETS.keys(), required=True)
-    parser.add_argument("--model", choices=["tfidf_lr", "sbert_lr", "torch_mlp"], required=True)
+    parser.add_argument("--model", choices=config.models.keys(), required=True)
     parser.add_argument("--cv", type=int, default=10)
     parser.add_argument("--save", action="store_true", help="Treina em 100% e salva pipeline em /models")
     parser.add_argument("--out", type=str, default="results.csv", help="CSV cumulativo de resultados")
@@ -26,7 +24,7 @@ def main():
     print(f"\n=== Treinando: dataset={args.dataset} | model={args.model} ===")
     X, y = load_dataset(DATABASE := DATASETS[args.dataset])
 
-    model = get_model(args.model)
+    model = config.get_model(args.model)
 
     cv = StratifiedKFold(n_splits=args.cv, shuffle=True, random_state=42)
     scores = cross_val_score(model, X, y, cv=cv, scoring="accuracy", n_jobs=1)
