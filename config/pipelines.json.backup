@@ -391,66 +391,71 @@
         ]
       }
     },
-    {
-      "model": "torch_mlp",
-      "param_grid": {
-        "mlp__hidden": [
-          128,
-          256
-        ],
-        "mlp__epochs": [
-          5,
-          10
-        ]
-      }
-    },
-    {
-      "model": "word2vec_lr",
-      "param_grid": {
-        "word2vec__vector_size": [
-          50,
-          100,
-          200
-        ],
-        "word2vec__window": [
-          3,
-          5,
-          7
-        ],
-        "word2vec__sg": [
-          0,
-          1
-        ],
-        "clf__C": [
-          0.1,
-          1.0,
-          10.0
-        ]
-      }
-    },
-    {
-      "model": "word2vec_svc",
-      "param_grid": {
-        "word2vec__vector_size": [
-          50,
-          100,
-          200
-        ],
-        "word2vec__window": [
-          3,
-          5,
-          7
-        ],
-        "word2vec__sg": [
-          0,
-          1
-        ],
-        "clf__C": [
-          0.1,
-          1.0,
-          10.0
-        ]
-      }
-    }
   ]
+}
+},
+{
+"model": "torch_mlp",
+"param_grid": {
+  "mlp__hidden": [
+    128,
+    256
+  ],
+  "mlp__epochs": [
+    5,
+    10
+  ]
+}
+},
+{
+"model": "word2vec_lr",
+"param_grid": {
+  "word2vec__vector_size": [
+    50,
+    100,
+    200
+  ],
+  "word2vec__window": [
+    3,
+    5,
+    7
+  ],
+  "word2vec__sg": [
+    0,
+    1
+  ],
+  "clf__C": [
+    0.1,
+    1.0,
+    10.0
+  ]
+}
+},
+{
+"model": "word2vec_svc",
+"param_grid": {
+  "word2vec__vector_size": [
+    50,
+    100,
+    200
+  ],
+  "word2vec__window": [
+    3,
+    5,
+    7
+  ],
+  "word2vec__sg": [
+    0,
+    1
+  ],
+  "clf__C": [
+    0.1,
+    1.0,
+    10.0
+  ]
+}
+}
+]
+}
+]
 }
